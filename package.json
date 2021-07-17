@@ -1,0 +1,14 @@
+{
+  "name": "compliator",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Muhammet <nsaryyev9797@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "complier": "nodemon start"
+  },
+  "dependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
