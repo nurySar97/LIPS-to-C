@@ -1,4 +1,6 @@
-'use strict';
+import chalk from 'chalk';
+const { blue, red, green } = chalk;
+const log = (color, data) => console.log(color(JSON.stringify(data, null, 2)));
 /* 
  * If we had two functions `add` and `subtract` they would be written like this:
  *                  LISP                      C
@@ -14,7 +16,8 @@
  * demonstrate many of the major pieces of a modern compiler.
 */
 
-/**
+/*
+ *
  * Most compilers break down into three primary stages: Parsing, Transformation,
  * and Code Generation
  *
@@ -26,15 +29,16 @@
  *
  * 3. *Code Generation* takes the transformed representation of the code and
  *    turns it into new code.
- */
+*/
 
-// Tokenizer
+// TOKENIZER
 function tokenizer(input) {
     let current = 0;
     let tokens = [];
 
     while (current < input.length) {
         let char = input[current];
+        // parentheses
         if (char === "(" || char === ")") {
             tokens.push({
                 type: 'paren',
@@ -43,15 +47,16 @@ function tokenizer(input) {
             ++current;
             continue
         }
-
+        // white space
         let WS = /\s/i;
 
         if (WS.test(char)) {
             ++current;
             continue;
         }
-
+        // number
         let NUMBER = /[0-9]/i;
+
         if (NUMBER.test(char)) {
             tokens.push({
                 type: 'number',
@@ -60,6 +65,7 @@ function tokenizer(input) {
             ++current;
             continue
         }
+        // opening quote
         if (char === '"') {
             let value = '';
             char = input[++current];
@@ -75,19 +81,25 @@ function tokenizer(input) {
             })
             continue
         }
+        // letter
         let LETTER = /[a-z]/i;
+
         if (LETTER.test(char)) {
             let value = '';
+
             while (LETTER.test(char)) {
                 value += char;
                 char = input[++current];
             }
+
             tokens.push({
                 type: 'name',
                 value
             });
+
             continue;
         }
+
         throw new SyntaxError('I dont know what this character is: ' + char)
     }
     return tokens
@@ -96,8 +108,10 @@ function tokenizer(input) {
 // PARSER
 function parser(tokens) {
     let current = 0;
+
     function walk() {
         let token = tokens[current];
+
         if (token.type === 'number') {
             ++current;
             return {
@@ -105,6 +119,7 @@ function parser(tokens) {
                 value: token.value
             }
         }
+
         if (token.type === 'string') {
             ++current;
             return {
@@ -112,31 +127,47 @@ function parser(tokens) {
                 value: token.value
             }
         }
+
         if (token.type === 'paren' && token.value === '(') {
             token = tokens[++current];
+
             let node = {
                 type: 'CallExpression',
                 name: token.value,
                 params: []
             }
+
             token = tokens[++current];
+
             while (token.type !== 'paren' || (token.type === 'paren' && token.value !== ')')) {
                 node.params.push(walk());
                 token = tokens[current]
             }
+
             ++current;
+
             return node;
         }
     }
+
     // An Abstract Syntax Tree
-    let AST = {
+    let ast = {
         type: 'Program',
         body: []
     }
+
     while (current < tokens.length) {
-        AST.body.push(walk());
+        
+        ast.body.push(walk());
     }
-    return AST;
+   
+    return ast;
 }
 
-console.log(parser(tokenizer('(add 2 (subtract 4 2))')));
+// TRAVERSER
+let tokens = tokenizer('(add 2 (subtract 4 2))');
+let ast = parser(tokens);
+
+log(red, '(add 2 (subtract 4 2))')
+log(blue, tokens);
+log(green, ast);

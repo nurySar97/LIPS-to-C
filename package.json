@@ -1,5 +1,6 @@
 {
   "name": "compliator",
+  "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "author": "Muhammet <nsaryyev9797@gmail.com>",
@@ -9,6 +10,7 @@
     "complier": "nodemon start"
   },
   "dependencies": {
+    "chalk": "^4.1.1",
     "nodemon": "^2.0.12"
   }
 }
