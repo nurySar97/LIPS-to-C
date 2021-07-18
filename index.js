@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-const { blue, red, green } = chalk;
+const { blue, red, green, cyan, yellow } = chalk;
 const log = (color, data) => console.log(color(JSON.stringify(data, null, 2)));
 /* 
  * If we had two functions `add` and `subtract` they would be written like this:
@@ -157,17 +157,60 @@ function parser(tokens) {
     }
 
     while (current < tokens.length) {
-        
+
         ast.body.push(walk());
     }
-   
+
     return ast;
 }
 
 // TRAVERSER
+function traverser(ast, visitor) {
+
+    function traverseArray(array, parent) {
+        array.forEach(child => {
+            traverseNode(child, parent);
+        });
+    }
+
+    function traverseNode(node, parent) {
+        let methods = visitor[node.type];
+
+        if (methods && methods.enter) {
+            methods.enter(node, parent);
+        }
+
+        switch (node.type) {
+            case 'Program':
+                traverseArray(node.body, node);
+                break;
+            case 'CallExpression':
+                traverseArray(node.params, node);
+                break;
+            case 'NumberLiteral':
+            case 'StringLiteral':
+                break;
+            default:
+                throw new TypeError(node.type);
+        }
+
+        if (methods && methods.exit) {
+            methods.exit(node, parent);
+        }
+    }
+
+    traverseNode(ast, null);
+}
+
+
+
 let tokens = tokenizer('(add 2 (subtract 4 2))');
 let ast = parser(tokens);
 
-log(red, '(add 2 (subtract 4 2))')
+
+log(red, '(add 2 (subtract 4 2))');
+
 log(blue, tokens);
+
 log(green, ast);
+
