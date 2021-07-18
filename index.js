@@ -260,11 +260,33 @@ function transformer(ast) {
     return newAst;
 }
 
-
+// CODE GENERATOR
+function codeGenerator(node) {
+    switch (node.type) {
+        case 'Program':
+            return node.body.map(codeGenerator)
+                .join('\n');
+        case 'ExpressionStatement':
+            return codeGenerator(node.expression) + ';';
+        case 'CallExpression':
+            return (
+                codeGenerator(node.callee) + '(' + node.arguments.map(codeGenerator).join(', ') + ')'
+            );
+        case 'Identifier':
+            return node.name;
+        case 'NumberLiteral':
+            return node.value;
+        case 'StringLiteral':
+            return '"' + node.value + '"';
+        default:
+            throw new TypeError(node.type);
+    }
+}
 
 let tokens = tokenizer('(add 2 (subtract 4 2))');
 let ast = parser(tokens);
 let newAST = transformer(ast);
+let output = codeGenerator(newAST);
 
 log(red, '(add 2 (subtract 4 2))');
 
@@ -274,3 +296,4 @@ log(green, ast);
 
 log(cyan, newAST);
 
+log(yellow, output)
